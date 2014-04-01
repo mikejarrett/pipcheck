@@ -10,3 +10,4 @@ logs/*
 nosetests.xml
 pylint.txt
 pep8.txt
+cover/*

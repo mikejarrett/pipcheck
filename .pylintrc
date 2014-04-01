@@ -17,8 +17,7 @@ cache-size=500
 # E1101 - Instance of <class> has no member <member>
 # E1002 - Use of super on an old style class
 # W1401 - Anomylous backslash in string
-# R0924 - Badly implemented container
-disable=C0111,I0011,I0012,W0142,W0212,W0232,W0613,R0801,R0901,F0401,E1101,E1002,W1401,R0924,W0201
+disable=C0111,I0011,I0012,W0142,W0212,W0232,W0613,R0801,R0901,F0401,E1101,E1002,W1401,W0201
 
 [REPORTS]
 output-format=parseable

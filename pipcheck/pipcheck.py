@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf8 -*-
 import csv
 import pip
@@ -23,31 +22,63 @@ class Update(object):
 
 class Checker(object):
 
-    def __init__(self, pypi='http://pypi.python.org/pypi',
-                 csv_file='requirements.csv', new_config=None):
-        self.pypi = xmlrpclib.ServerProxy(pypi)
-        self.csv_file = csv_file
-        self.new_config = new_config
-        self.csv_column_headers = [
+    def __init__(self, csv_file=False, new_config=False,
+                 pypi='http://pypi.python.org/pypi'):
+        self._pypi = xmlrpclib.ServerProxy(pypi)
+        self._csv_file = csv_file
+        self._new_config = new_config
+        self._csv_column_headers = [
             'Package', 'Current Version', 'Upgrade Avaiable'
         ]
 
-    def write_updates_to_csv(self):
+    def __call__(self):
         """
-        Checks for package updates and writes the returned dictionary to CSV
-        file defined at init
+        When called, get the environment updates and write updates to a CSV
+        file and if a new config has been provided, write a new configuration
+        file.
         """
-        updates = self.get_environment_updates()
+        updates = []
 
-        with open(self.csv_file, 'wb') as csvfile:
+        if self._csv_file or self._new_config:
+            updates = self._get_environment_updates()
+
+        if updates and self._csv_file:
+            self.write_updates_to_csv(updates)
+
+        if updates and self._new_config:
+            self.write_new_config(updates)
+
+    def write_updates_to_csv(self, updates):
+        """
+        Given a list of updates, write the updates out to the provided CSV file
+
+        :param updates: List of Update objects
+        :param type: list
+        """
+        with open(self._csv_file, 'wb') as csvfile:
             csvwriter = csv.writer(csvfile, delimiter=',')
-            csvwriter.writerow(self.csv_column_headers)
+            csvwriter.writerow(self._csv_column_headers)
 
             for update in updates:
                 row = [update.name, update.current_version, update.new_version]
                 csvwriter.writerow(row)
 
-    def get_environment_updates(self):
+    def write_new_config(self, updates):
+        """
+        Given a list of updates, write the updates out to the provided
+        configuartion file
+
+        :param updates: List of Update objects
+        :param type: list
+        """
+        with open(self._new_config, 'wb') as config_file:
+            for update in updates:
+                line = '{0}=={1} # The current version is: {2}\n'.format(
+                update.name, update.new_version, update.current_version)
+
+                config_file.write(line)
+
+    def _get_environment_updates(self):
         """
         Check all pacakges installed in the environment to see if there are
         any updates availalble
@@ -64,6 +95,7 @@ class Checker(object):
                     distribution.project_name, distribution.version,
                     max(versions)
                 ))
+                print updates[-1]
 
         return sorted(updates, key=lambda x: x.name)
 
@@ -75,9 +107,9 @@ class Checker(object):
         :returns: list of float versions
         :rtype: list of float
         """
-        available_versions = self.pypi.package_releases(project_name)
+        available_versions = self._pypi.package_releases(project_name)
         if not available_versions:
-            available_versions = self.pypi.package_releases(
+            available_versions = self._pypi.package_releases(
                 project_name.capitalize()
             )
 

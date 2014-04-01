@@ -1,0 +1,12 @@
+*.pyc
+.DS_Store
+docs/html/*
+docs/build
+coverage.xml
+htmlcov/*
+.coverage
+build/*
+logs/*
+nosetests.xml
+pylint.txt
+pep8.txt

@@ -13,7 +13,7 @@ config = {
     'download_url': 'https://github.com/mikejarrett',
     'author_email': 'mdj00m@gmail.com',
     'version': pipcheck.__version__,
-    'install_requires': ['nose'],
+    'install_requires': ['pip'],
     'packages': ['pipcheck'],
     'scripts': [],
     'name': 'pip-checker',

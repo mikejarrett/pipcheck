@@ -9,14 +9,14 @@ import pipcheck
 config = {
     'description': 'Environment package update checker',
     'author': 'Mike Jarrett',
-    'url': 'https://github.com/mikejarrett',
-    'download_url': 'https://github.com/mikejarrett',
+    'url': 'https://github.com/mikejarrett/pipcheck',
+    'download_url': 'https://github.com/mikejarrett/pipcheck',
     'author_email': 'mdj00m@gmail.com',
     'version': pipcheck.__version__,
     'install_requires': ['pip'],
     'packages': ['pipcheck'],
     'scripts': [],
-    'name': 'pip-checker',
+    'name': 'pipcheck',
     'entry_points':  {
         'console_scripts': [
             'pipcheck = pipcheck.main:main',

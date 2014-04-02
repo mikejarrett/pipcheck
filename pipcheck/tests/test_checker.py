@@ -113,6 +113,21 @@ def test_check_for_updates(pip):
         assert_equals(isinstance(ret_val[0], Update), True)
         assert_equals(ret_val[0].name, 'First Project')
 
+@mock.patch('pipcheck.pipcheck.pip')
+def test_check_for_updates_versions_with_letters(pip):
+    dist1 = mock.Mock(project_name='First Project', version='1.3a')
+    dist2 = mock.Mock(project_name='Last Project', version='0.04dev')
+    pip.get_installed_distributions.return_value = [dist2, dist1]
+    checker = get_checker()
+
+    with mock.patch.object(checker, '_get_available_versions') as get_versions:
+        get_versions.return_value = ['10.1c', '0.04prod', '1.3']
+        ret_val = checker._get_environment_updates()
+
+        assert_equals(isinstance(ret_val, list), True)
+        assert_equals(isinstance(ret_val[0], Update), True)
+        assert_equals(ret_val[0].name, 'First Project')
+        assert_equals(ret_val[0].new_version, '10.1c')
 
 def test_get_available_versions_capitalize():
     package_releases = mock.Mock(side_effect=([], [1.0]))

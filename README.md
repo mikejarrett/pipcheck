@@ -3,15 +3,34 @@ pipcheck
 pipcheck is an application that checks for updates for PIP packages that are
 installed
 
+Requirements
+============
+
+Required
+--------
+
+`python` and the following modules
+
+ * `pip`
+
+Optional
+--------
+
+ * `nose` for running tests
+
 Installation
 ============
 Installation using pip:
-    $ pip install pipcheck
+```
+ $ pip install pipcheck
+```
 
 Installation from source:
-    $ git clone < repositry  >
-    $ cd pipcheck
-    $ sudo python setup.py install
+```
+ $ git clone < repo >
+ $ cd pipcheck
+ $ sudo python setup.py install
+```
 
 Usage
 ======
@@ -26,7 +45,8 @@ Update ipython (1.2.1 to 2.0.0)
 ```
 
 
-##Command-line
+Command-line
+------------
 ```
 usage: pipcheck [-h] [-c [/path/file]] [-r [/path/file]]
                 [-p [http://pypi.python.org/pypi]]

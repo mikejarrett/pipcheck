@@ -28,7 +28,7 @@ Installation using pip:
 
 Installation from source:
 ```
- $ git clone < repo >
+ $ git clone https://github.com/mikejarrett/pipcheck.git
  $ cd pipcheck
  $ sudo python setup.py install
 ```

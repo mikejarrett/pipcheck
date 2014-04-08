@@ -23,18 +23,34 @@ UNKNOW_NUM = -32768
 
 class Update(object):
 
+    @property
+    def up_to_date(self):
+        return self.current_version == self.new_version
+
     def __init__(self, name, current_version, new_version):
         self.name = name
         self.current_version = current_version
         self.new_version = new_version
 
-    def __repr__(self):
-        return u'<Update {0} ({1} to {2})>'.format(
-            self.name, self.current_version, self.new_version)
+    def __unicode__(self):
+        if self.up_to_date:
+            return u'Update {name} (up to date)'.format(name=self.name)
+        elif self.new_version == UNKNOWN:
+            return u'Update {name} ({new_version})'.format(
+                name=self.name, new_version=self.new_version)
+        else:
+            return (
+                u'Update {name} ({current_version} to '
+                u'{new_version})'.format(
+                    name=self.name, current_version=self.current_version,
+                    new_version=self.new_version
+                ))
 
     def __str__(self):
-        return u'Update {0} ({1} to {2})'.format(
-            self.name, self.current_version, self.new_version)
+        return unicode(self).encode('utf-8')
+
+    def __repr__(self):
+        return unicode(self).encode('utf-8')
 
 
 class Checker(object):

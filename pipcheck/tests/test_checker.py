@@ -53,12 +53,28 @@ def test_checker_init():
 @mock.patch('pipcheck.pipcheck.Checker.write_updates_to_csv')
 @mock.patch('pipcheck.pipcheck.Checker.write_new_config')
 @mock.patch('pipcheck.pipcheck.Checker._get_environment_updates')
-def test_checker_call(get_updates, write_config, write_csv):
+def test_checker_call_no_verbose(get_updates, write_config, write_csv):
     update = mock.Mock()
     get_updates.return_value = [update]
     Checker(csv_file='/path/file.csv', new_config='/path/new.pip')()
 
     assert_equals(get_updates.call_count, 1)
+    assert_equals(write_config.call_count, 1)
+    assert_equals(write_csv.call_count, 1)
+    assert_equals(write_config.call_args, mock.call([update]))
+    assert_equals(write_csv.call_args, mock.call([update]))
+
+@mock.patch('pipcheck.pipcheck.Checker.write_updates_to_csv')
+@mock.patch('pipcheck.pipcheck.Checker.write_new_config')
+@mock.patch('pipcheck.pipcheck.Checker._get_environment_updates')
+def test_checker_call_verbose(get_updates, write_config, write_csv):
+    update = mock.Mock()
+    get_updates.return_value = [update]
+    checker = Checker(csv_file='/path/file.csv', new_config='/path/new.pip')
+    checker(get_all_updates=True, verbose=True)
+
+    assert_equals(get_updates.call_count, 1)
+    assert_equals(get_updates.call_args, mock.call(get_all_updates=True))
     assert_equals(write_config.call_count, 1)
     assert_equals(write_csv.call_count, 1)
     assert_equals(write_config.call_args, mock.call([update]))
@@ -108,6 +124,20 @@ def test_check_for_updates(pip):
     with mock.patch.object(checker, '_get_available_versions') as get_versions:
         get_versions.return_value = [10.1, 0.04, 1.3]
         ret_val = checker._get_environment_updates()
+
+        assert_equals(isinstance(ret_val, list), True)
+        assert_equals(isinstance(ret_val[0], Update), True)
+        assert_equals(ret_val[0].name, 'First Project')
+
+@mock.patch('pipcheck.pipcheck.pip')
+def test_check_for_updates_same_revision(pip):
+    dist1 = mock.Mock(project_name='First Project', version=1.3)
+    pip.get_installed_distributions.return_value = [dist1]
+    checker = get_checker()
+
+    with mock.patch.object(checker, '_get_available_versions') as get_versions:
+        get_versions.return_value = [1.3]
+        ret_val = checker._get_environment_updates(get_all_updates=True)
 
         assert_equals(isinstance(ret_val, list), True)
         assert_equals(isinstance(ret_val[0], Update), True)

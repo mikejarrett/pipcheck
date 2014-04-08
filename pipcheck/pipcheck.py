@@ -18,6 +18,8 @@ import csv
 import pip
 import xmlrpclib
 
+UNKNOWN = 'Unknown'
+UNKNOW_NUM = -32768
 
 class Update(object):
 
@@ -46,16 +48,19 @@ class Checker(object):
             'Package', 'Current Version', 'Upgrade Avaiable'
         ]
 
-    def __call__(self):
+    def __call__(self, get_all_updates=False, verbose=False):
         """
         When called, get the environment updates and write updates to a CSV
         file and if a new config has been provided, write a new configuration
         file.
         """
-        updates = []
+        print(u'Checking installed packages for updates...')
+        updates = self._get_environment_updates(
+            get_all_updates=get_all_updates)
 
-        if self._csv_file or self._new_config:
-            updates = self._get_environment_updates()
+        if updates and verbose:
+            for update in updates:
+                print(update)
 
         if updates and self._csv_file:
             self.write_updates_to_csv(updates)
@@ -93,7 +98,7 @@ class Checker(object):
 
                 config_file.write(line)
 
-    def _get_environment_updates(self):
+    def _get_environment_updates(self, get_all_updates=False):
         """
         Check all pacakges installed in the environment to see if there are
         any updates availalble
@@ -105,12 +110,21 @@ class Checker(object):
         for distribution in pip.get_installed_distributions():
             versions = self._get_available_versions(distribution.project_name)
 
-            if versions and max(versions) > distribution.version:
+            max_version = max(versions) if versions else UNKNOW_NUM
+            if versions and max_version > distribution.version:
                 updates.append(Update(
                     distribution.project_name, distribution.version,
-                    max(versions)
+                    max_version
                 ))
-                print updates[-1]
+            elif get_all_updates and max_version == distribution.version:
+                updates.append(Update(
+                    distribution.project_name, distribution.version,
+                    max_version
+                ))
+            elif get_all_updates:
+                updates.append(Update(
+                    distribution.project_name, distribution.version, UNKNOWN
+                ))
 
         return sorted(updates, key=lambda x: x.name)
 

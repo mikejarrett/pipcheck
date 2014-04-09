@@ -60,7 +60,10 @@ Command-line
 
     usage: pipcheck [-h] [-c [/path/file]] [-r [/path/file]] [-v] [-a]
     [-p [http://pypi.python.org/pypi]]
-    pipcheck is an application that checks for updates for PIP packages that are  installed
+
+    pipcheck is an application that checks for updates for PIP packages that arer
+    installed
+
     optional arguments:
     -h, --help            show this help message and exit
     -c [/path/file], --csv [/path/file]

@@ -1,26 +1,20 @@
 # -*- coding: utf-8 -*-
-
-#  Copyright 2014 Mike Jarrett
-#
-#  Licensed under the Apache License, Version 2.0 (the "License");
-#  you may not use this file except in compliance with the License.
-#  You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-#  Unless required by applicable law or agreed to in writing, software
-#  distributed under the License is distributed on an "AS IS" BASIS,
-#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#  See the License for the specific language governing permissions and
-#  limitations under the License.
+from __future__ import unicode_literals
+from future.utils import python_2_unicode_compatible
 
 import csv
+try:  # Py3
+   import xmlrpc.client as xmlrpclib
+    import xmlrpclib
+
 import pip
-import xmlrpclib
+
 
 UNKNOWN = 'Unknown'
 UNKNOW_NUM = -32768
 
+
+@python_2_unicode_compatible
 class Update(object):
 
     @property
@@ -32,7 +26,8 @@ class Update(object):
         self.current_version = current_version
         self.new_version = new_version
 
-    def __unicode__(self):
+
+    def __str__(self):
         if self.up_to_date:
             return u'Update {name} (up to date)'.format(name=self.name)
         elif self.new_version == UNKNOWN:
@@ -46,17 +41,17 @@ class Update(object):
                     new_version=self.new_version
                 ))
 
-    def __str__(self):
-        return unicode(self).encode('utf-8')
-
     def __repr__(self):
-        return unicode(self).encode('utf-8')
-
+        return str(self)
 
 class Checker(object):
 
-    def __init__(self, csv_file=False, new_config=False,
-                 pypi='http://pypi.python.org/pypi'):
+    def __init__(
+        self,
+        csv_file=False,
+        new_config=False,
+        pypi='http://pypi.python.org/pypi'
+    ):
         self._pypi = xmlrpclib.ServerProxy(pypi)
         self._csv_file = csv_file
         self._new_config = new_config

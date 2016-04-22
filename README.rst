@@ -1,8 +1,7 @@
 pipcheck
 ========
 
-.. image::
-    https://travis-ci.org/mikejarrett/pipcheck.svg?branch=tox-travis-stuff
+.. image:: https://travis-ci.org/mikejarrett/pipcheck.svg?branch=master
     :target: https://travis-ci.org/mikejarrett/pipcheck
 
 

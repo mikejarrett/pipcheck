@@ -9,7 +9,7 @@ def main():
     parser = argparse.ArgumentParser(
         description=(
             'pipcheck is an application that checks for updates for PIP '
-            'packages that are installed'
+            'packages that are installed.'
         )
     )
     parser.add_argument(

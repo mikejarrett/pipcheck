@@ -1,26 +1,21 @@
 # -*- coding: utf-8 -*-
-
-#  Copyright 2014 Mike Jarrett
-#
-#  Licensed under the Apache License, Version 2.0 (the "License");
-#  you may not use this file except in compliance with the License.
-#  You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-#  Unless required by applicable law or agreed to in writing, software
-#  distributed under the License is distributed on an "AS IS" BASIS,
-#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#  See the License for the specific language governing permissions and
-#  limitations under the License.
+from __future__ import unicode_literals
 
 import csv
+try:  # Py3
+    import xmlrpc.client as xmlrpclib
+except ImportError:  # Py2
+    import xmlrpclib
+
+from future.utils import python_2_unicode_compatible
 import pip
-import xmlrpclib
+
 
 UNKNOWN = 'Unknown'
 UNKNOW_NUM = -32768
 
+
+@python_2_unicode_compatible
 class Update(object):
 
     @property
@@ -32,7 +27,7 @@ class Update(object):
         self.current_version = current_version
         self.new_version = new_version
 
-    def __unicode__(self):
+    def __str__(self):
         if self.up_to_date:
             return u'Update {name} (up to date)'.format(name=self.name)
         elif self.new_version == UNKNOWN:
@@ -46,17 +41,18 @@ class Update(object):
                     new_version=self.new_version
                 ))
 
-    def __str__(self):
-        return unicode(self).encode('utf-8')
-
     def __repr__(self):
-        return unicode(self).encode('utf-8')
+        return str(self)
 
 
 class Checker(object):
 
-    def __init__(self, csv_file=False, new_config=False,
-                 pypi='http://pypi.python.org/pypi'):
+    def __init__(
+        self,
+        csv_file=False,
+        new_config=False,
+        pypi='http://pypi.python.org/pypi'
+    ):
         self._pypi = xmlrpclib.ServerProxy(pypi)
         self._csv_file = csv_file
         self._new_config = new_config
@@ -70,7 +66,8 @@ class Checker(object):
         file and if a new config has been provided, write a new configuration
         file.
         """
-        print(u'Checking installed packages for updates...')
+        # pylint: disable=superfluous-parens
+        print('Checking installed packages for updates...')
         updates = self._get_environment_updates(
             get_all_updates=get_all_updates)
 
@@ -110,7 +107,10 @@ class Checker(object):
         with open(self._new_config, 'wb') as config_file:
             for update in updates:
                 line = '{0}=={1} # The current version is: {2}\n'.format(
-                update.name, update.new_version, update.current_version)
+                    update.name,
+                    update.new_version,
+                    update.current_version
+                )
 
                 config_file.write(line)
 

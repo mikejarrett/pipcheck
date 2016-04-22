@@ -1,59 +1,31 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 
-#  Copyright 2014 Mike Jarrett
-#
-#  Licensed under the Apache License, Version 2.0 (the "License");
-#  you may not use this file except in compliance with the License.
-#  You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-#  Unless required by applicable law or agreed to in writing, software
-#  distributed under the License is distributed on an "AS IS" BASIS,
-#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#  See the License for the specific language governing permissions and
-#  limitations under the License.
+from unittest import TestCase
 
-import mock
-
-from nose.tools import eq_ as assert_equals
-
-from pipcheck.pipcheck import Update, UNKNOWN
+from pipcheck.pipcheck import Update
 
 
-def test_update_class():
-    update = Update('Package Name', 1.1, 2.2)
-    assert_equals(update.name, 'Package Name')
-    assert_equals(update.current_version, 1.1)
-    assert_equals(update.new_version, 2.2)
+class TestUpdate(TestCase):
 
+    def test_update_class(self):
+        update = Update('Package Name', 1.1, 2.2)
+        self.assertEqual(update.name, 'Package Name')
+        self.assertEqual(update.current_version, 1.1)
+        self.assertEqual(update.new_version, 2.2)
 
-def test_update_repr():
-    update = Update('Package Name', 1.1, 2.2)
-    assert_equals(repr(update), u'Update Package Name (1.1 to 2.2)')
+    def test_update_repr(self):
+        update = Update('Package Name', 1.1, 2.2)
+        self.assertEqual(str(repr(update)), 'Update Package Name (1.1 to 2.2)')
 
+    def test_update_str(self):
+        update = Update('Package Name', 1.1, 2.2)
+        self.assertEqual(str(str(update)), 'Update Package Name (1.1 to 2.2)')
 
-def test_update_str():
-    update = Update('Package Name', 1.1, 2.2)
-    assert_equals(str(update), u'Update Package Name (1.1 to 2.2)')
+    def test_update_str_up_to_date(self):
+        update = Update('Package Name', 1.1, 1.1)
+        self.assertEqual(str(update), 'Update Package Name (up to date)')
 
-
-def test_update_unicode_unknown():
-    update = Update('Package Name', 1.1, UNKNOWN)
-    assert_equals(unicode(update), u'Update Package Name (Unknown)')
-
-
-def test_update_unicode_up_to_date():
-    update = Update('Package Name', 1.1, 1.1)
-    assert_equals(unicode(update), u'Update Package Name (up to date)')
-
-
-def test_update_unicode_up_to_date():
-    update = Update('Package Name', 1.1, '2.1a')
-    assert_equals(unicode(update), u'Update Package Name (1.1 to 2.1a)')
-
-
-def test_update_up_to_date_property():
-    update = Update('Package Name', 1.1, 1.1)
-    assert_equals(update.up_to_date, True)
-
+    def test_update_up_to_date_property(self):
+        update = Update('Package Name', 1.1, 1.1)
+        self.assertEqual(update.up_to_date, True)

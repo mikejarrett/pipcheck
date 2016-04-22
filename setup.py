@@ -1,32 +1,43 @@
 # -*- coding: utf8 -*-
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
+from codecs import open
+from os import path
+from setuptools import setup, find_packages
 
 import pipcheck
 
+here = path.abspath(path.dirname(__file__))
+with open(path.join(here, 'README.rst'), encoding='utf-8') as file_:
+    long_description = file_.read()
 
-with open('README.rst', 'rb') as readme:
-    long_description = readme.read()
 
-
-config = {
+setup(**{
     'name': 'pipcheck',
     'version': pipcheck.__version__,
     'author': 'Mike Jarrett',
-    'author_email': 'mdj00m@gmail.com',
+    'author_emai': 'mike<dot>d<dot>jarrett<at>gmail<dot>com',
     'url': 'https://github.com/mikejarrett/pipcheck',
     'description': 'Environment package update checker',
     'long_description': long_description,
     'download_url': 'https://github.com/mikejarrett/pipcheck',
-    'install_requires': ['pip'],
+    'install_requires': ['pip', 'future'],
     'packages': ['pipcheck'],
     'scripts': [],
+    'tests_require': ['nose', 'coverage', 'unittest2', 'mock'],
     'entry_points':  {
         'console_scripts': [
             'pipcheck = pipcheck.main:main',
-        ]},
-}
-
-setup(**config)
+        ]
+    },
+    'classifiers': [
+        'Development Status :: 5 - Production/Stable',
+        'Intended Audience :: End Users/Desktop',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.0',
+        'Programming Language :: Python :: 3.1',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Operating System :: POSIX :: Linux',
+        'Operating System :: Microsoft :: Windows :: Windows 10'
+    ],
+})

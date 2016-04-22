@@ -5,6 +5,7 @@ from future.utils import python_2_unicode_compatible
 import csv
 try:  # Py3
    import xmlrpc.client as xmlrpclib
+except ImportError:  # Py2
     import xmlrpclib
 
 import pip
@@ -26,7 +27,6 @@ class Update(object):
         self.current_version = current_version
         self.new_version = new_version
 
-
     def __str__(self):
         if self.up_to_date:
             return u'Update {name} (up to date)'.format(name=self.name)
@@ -44,6 +44,7 @@ class Update(object):
     def __repr__(self):
         return str(self)
 
+        
 class Checker(object):
 
     def __init__(
@@ -65,7 +66,7 @@ class Checker(object):
         file and if a new config has been provided, write a new configuration
         file.
         """
-        print(u'Checking installed packages for updates...')
+        print('Checking installed packages for updates...')
         updates = self._get_environment_updates(
             get_all_updates=get_all_updates)
 

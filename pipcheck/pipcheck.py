@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from future.utils import python_2_unicode_compatible
 
 import csv
 try:  # Py3
-   import xmlrpc.client as xmlrpclib
+    import xmlrpc.client as xmlrpclib
 except ImportError:  # Py2
     import xmlrpclib
 
+from future.utils import python_2_unicode_compatible
 import pip
 
 
@@ -44,7 +44,7 @@ class Update(object):
     def __repr__(self):
         return str(self)
 
-        
+
 class Checker(object):
 
     def __init__(
@@ -66,6 +66,7 @@ class Checker(object):
         file and if a new config has been provided, write a new configuration
         file.
         """
+        # pylint: disable=superfluous-parens
         print('Checking installed packages for updates...')
         updates = self._get_environment_updates(
             get_all_updates=get_all_updates)
@@ -106,7 +107,10 @@ class Checker(object):
         with open(self._new_config, 'wb') as config_file:
             for update in updates:
                 line = '{0}=={1} # The current version is: {2}\n'.format(
-                update.name, update.new_version, update.current_version)
+                    update.name,
+                    update.new_version,
+                    update.current_version
+                )
 
                 config_file.write(line)
 

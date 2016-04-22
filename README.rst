@@ -1,6 +1,11 @@
 pipcheck
 ========
 
+.. image::
+    https://travis-ci.org/mikejarrett/pipcheck.svg?branch=tox-travis-stuff
+    :target: https://travis-ci.org/mikejarrett/pipcheck
+
+
 pipcheck is an application that checks for updates for PIP packages that are
 installed
 
@@ -13,12 +18,16 @@ Required
 ``python`` and the following modules
 
   - ``pip``
+  - ``future``
 
-Optional
---------
 
- - ``nose`` for running tests
- - ``mock`` for running tests
+Tests Requirements
+------------------
+
+ - ``nose``
+ - ``mock``
+ - ``unittest2``
+
 
 Installation
 ============
@@ -78,6 +87,6 @@ Command-line
 
 Licence
 =======
-Apache v2 License
+MIT Licence
 
-http://www.apache.org/licenses/
+https://opensource.org/licenses/MIT

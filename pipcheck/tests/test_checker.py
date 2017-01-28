@@ -1,24 +1,23 @@
 # -*- coding: utf-8 -*-
-# pylint: disable=protected-access
-from __future__ import unicode_literals
 import sys
+from collections import namedtuple
 
 import mock
-
 from unittest2 import TestCase
 
-from pipcheck.pipcheck import Checker
-from pipcheck.pipcheck import Update
+from pipcheck.checker import Checker
+from pipcheck.clients import PyPIClientPureMemory
+from pipcheck.constants import UNKNOWN, CSV_COLUMN_HEADERS
+from pipcheck.update import Update
 
 
-@mock.patch('pipcheck.pipcheck.xmlrpclib')
-def get_checker(xmlrpclib=None):
-    xmlrpclib.ServerProxy.return_value = mock.Mock()
-    return Checker()
+Distribution = namedtuple('Distribution', ['project_name', 'version'])
 
 
-if sys.version_info[0] == 3:  # Py3
-    FILE_SPEC = [  # pylint: disable=invalid-name
+# Mock ``open`` and file``
+if sys.version_info[0] == 3:  # Python 3+
+    # pylint: disable=invalid-name
+    FILE_SPEC = [
         '_CHUNK_SIZE',
         '__enter__',
         '__eq__',
@@ -67,8 +66,10 @@ if sys.version_info[0] == 3:  # Py3
         'write',
         'writelines'
     ]
-else:  # Py2
-    FILE_SPEC = file  # pylint: disable=redefined-variable-type,invalid-name
+
+else:  # Python 2
+    # pylint: disable=redefined-variable-type,invalid-name,undefined-variable
+    FILE_SPEC = file  # pylint: disable=undefined-variable
 
 
 def mockopen(mocker=None, data=None):
@@ -86,91 +87,153 @@ def mockopen(mocker=None, data=None):
     return mocker
 
 
+class PipMock(object):
+
+    def __init__(self):
+        self.distributions = []
+
+    def set_installed_distributions(self, distributions):
+        """
+            Args:
+                distributions (list): A list of "``distributions``".
+        """
+        assert isinstance(distributions, (tuple, list))
+        self.distributions = distributions
+
+    def get_installed_distributions(self):
+        return self.distributions
+
+
 class TestChecker(TestCase):
 
-    def test_checker_init(self):
+    maxDiff = None
+    pypi_client = PyPIClientPureMemory()
+
+    def setUp(self):
+        self.pypi_client.set_package_releases(
+            'pipcheck',
+            ['0.0.1', '0.0.2', '0.0.3', '0.0.4', '0.0.5', '0.0.6'],
+        )
+
+    def tearDown(self):
+        self.pypi_client.wipe()
+
+    def test_get_updates_no_updates_available(self):
         checker = Checker(
-            csv_file='/path/file.csv',
-            new_config='/path/new.pip'
+            pypi_client=self.pypi_client,
+            pip=PipMock(),
         )
-        self.assertEqual(checker._csv_file, '/path/file.csv')
-        self.assertEqual(checker._new_config, '/path/new.pip')
 
-    @mock.patch('pipcheck.pipcheck.Checker.write_updates_to_csv')
-    @mock.patch('pipcheck.pipcheck.Checker.write_new_config')
-    @mock.patch('pipcheck.pipcheck.Checker._get_environment_updates')
-    def test_checker_call_no_verbose(
-        self,
-        get_updates,
-        write_config,
-        write_csv
-    ):
-        update = mock.Mock()
-        get_updates.return_value = [update]
-        Checker(csv_file='/path/file.csv', new_config='/path/new.pip')()
+        actual = checker.get_updates()
+        self.assertEqual(actual, [])
 
-        self.assertEqual(get_updates.call_count, 1)
-        self.assertEqual(write_config.call_count, 1)
-        self.assertEqual(write_csv.call_count, 1)
-        self.assertEqual(write_config.call_args, mock.call([update]))
-        self.assertEqual(write_csv.call_args, mock.call([update]))
+    def test_get_updates_updates_available(self):
+        pip = PipMock()
+        pip.set_installed_distributions([Distribution('pipcheck', '0.0.1')])
 
-    @mock.patch('pipcheck.pipcheck.Checker.write_updates_to_csv')
-    @mock.patch('pipcheck.pipcheck.Checker.write_new_config')
-    @mock.patch('pipcheck.pipcheck.Checker._get_environment_updates')
-    def test_checker_call_verbose(self, get_updates, write_config, write_csv):
-        update = mock.Mock()
-        get_updates.return_value = [update]
         checker = Checker(
-            csv_file='/path/file.csv',
-            new_config='/path/new.pip'
+            pypi_client=self.pypi_client,
+            pip=pip,
         )
-        checker(get_all_updates=True, verbose=True)
 
-        self.assertEqual(get_updates.call_count, 1)
-        self.assertEqual(
-            get_updates.call_args,
-            mock.call(get_all_updates=True)
+        actual = checker.get_updates()
+        expected = [Update('pipcheck', '0.0.1', '0.0.6')]
+        self.assertEqual(actual, expected)
+
+    def test_get_updates_updates_available_prerelease(self):
+        self.pypi_client.set_package_releases('Pipcheck', ['0.0.6rc1'])
+
+        pip = PipMock()
+        pip.set_installed_distributions(
+            [Distribution('Pipcheck', '0.0.1')]
         )
-        self.assertEqual(write_config.call_count, 1)
-        self.assertEqual(write_csv.call_count, 1)
-        self.assertEqual(write_config.call_args, mock.call([update]))
-        self.assertEqual(write_csv.call_args, mock.call([update]))
 
-    @mock.patch('pipcheck.pipcheck.csv')
+        checker = Checker(
+            pypi_client=self.pypi_client,
+            pip=pip,
+        )
+
+        actual = checker.get_updates()
+        expected = [Update('Pipcheck', '0.0.1', '0.0.6rc1', True)]
+        self.assertEqual(actual, expected)
+
+    def test_get_updates_display_all_distributions(self):
+        pip = PipMock()
+        pip.set_installed_distributions(
+            [Distribution('pipcheck', '0.0.6')]
+        )
+
+        checker = Checker(
+            pypi_client=self.pypi_client,
+            pip=pip,
+        )
+
+        actual = checker.get_updates(display_all_distributions=True)
+        expected = [Update('pipcheck', '0.0.6', '0.0.6', False)]
+        self.assertEqual(actual, expected)
+
+    def test_get_updates_display_all_distributions_multiple(self):
+        pip = PipMock()
+        pip.set_installed_distributions([
+            Distribution('pipcheck', '0.0.6'),
+            Distribution('flush', '1.8.6')
+        ])
+
+        checker = Checker(
+            pypi_client=self.pypi_client,
+            pip=pip,
+        )
+
+        actual = checker.get_updates(display_all_distributions=True)
+        expected = [
+            Update('flush', '1.8.6', UNKNOWN, False),
+            Update('pipcheck', '0.0.6', '0.0.6', False)
+        ]
+        self.assertEqual(actual, expected)
+
+    @mock.patch('pipcheck.checker.csv')
     def test_write_updates_to_csv(self, patched_csv):
         updates = [Update('First', 1, 2), Update('Last', 5, 9)]
+
         csv_writer = mock.Mock()
         patched_csv.writer.return_value = csv_writer
 
-        checker = Checker()
+        pip = PipMock()
+        checker = Checker(
+            pypi_client=self.pypi_client,
+            pip=pip,
+        )
+
         open_mock = mockopen()
-        with mock.patch('pipcheck.pipcheck.open', open_mock, create=True):
+        with mock.patch('pipcheck.checker.open', open_mock, create=True):
             checker.write_updates_to_csv(updates)
 
         self.assertEqual(
             patched_csv.writer.call_args,
-            mock.call(open_mock.return_value, delimiter=',')
+            mock.call(open_mock.return_value)
         )
         self.assertEqual(patched_csv.writer.call_count, 1)
         self.assertEqual(csv_writer.writerow.call_count, 3)
         self.assertEqual(
             csv_writer.writerow.call_args_list,
             [
-                mock.call(
-                    ['Package', 'Current Version', 'Upgrade Avaiable']
-                ),
-                mock.call(['First', 1, 2]),
-                mock.call(['Last', 5, 9])
+                mock.call(CSV_COLUMN_HEADERS),
+                mock.call(['First', 1, 2, False]),
+                mock.call(['Last', 5, 9, False])
             ]
         )
 
     def test_write_new_config(self):
         updates = [Update('A Package', 1, 2), Update('Last', 5, 9)]
 
-        checker = Checker(new_config='/path/config.pip')
+        pip = PipMock()
+        checker = Checker(
+            pypi_client=self.pypi_client,
+            pip=pip,
+            new_config='/path/config.pip'
+        )
         open_mock = mockopen()
-        with mock.patch('pipcheck.pipcheck.open', open_mock, create=True):
+        with mock.patch('pipcheck.checker.open', open_mock, create=True):
             checker.write_new_config(updates)
 
         self.assertEqual(
@@ -178,68 +241,3 @@ class TestChecker(TestCase):
             mock.call('/path/config.pip', 'wb')
         )
         self.assertEqual(open_mock.return_value.write.call_count, 2)
-
-    @mock.patch('pipcheck.pipcheck.pip')
-    def test_check_for_updates(self, pip):
-        dist1 = mock.Mock(project_name='First Project', version=1.3)
-        dist2 = mock.Mock(project_name='Last Project', version=0.04)
-        pip.get_installed_distributions.return_value = [dist2, dist1]
-        checker = get_checker()
-
-        with mock.patch.object(
-            checker,
-            '_get_available_versions',
-            mock.Mock(return_value=[10.1, 0.04, 1.3])
-        ):
-            ret_val = checker._get_environment_updates()
-
-        self.assertEqual(isinstance(ret_val, list), True)
-        self.assertEqual(isinstance(ret_val[0], Update), True)
-        self.assertEqual(ret_val[0].name, 'First Project')
-
-    @mock.patch('pipcheck.pipcheck.pip')
-    def test_check_for_updates_same_revision(self, pip):
-        dist1 = mock.Mock(project_name='First Project', version=1.3)
-        pip.get_installed_distributions.return_value = [dist1]
-        checker = get_checker()
-
-        with mock.patch.object(
-            checker,
-            '_get_available_versions',
-            mock.Mock(return_value=[1.3])
-        ):
-            ret_val = checker._get_environment_updates(get_all_updates=True)
-
-        self.assertTrue(isinstance(ret_val, list))
-        self.assertTrue(isinstance(ret_val[0], Update))
-        self.assertEqual(ret_val[0].name, 'First Project')
-
-    @mock.patch('pipcheck.pipcheck.pip')
-    def test_check_for_updates_versions_with_letters(self, pip):
-        dist1 = mock.Mock(project_name='First Project', version='1.3a')
-        dist2 = mock.Mock(project_name='Last Project', version='0.04dev')
-        pip.get_installed_distributions.return_value = [dist2, dist1]
-        checker = get_checker()
-
-        with mock.patch.object(
-            checker,
-            '_get_available_versions',
-            mock.Mock(return_value=['10.1c', '0.04prod', '1.3'])
-        ):
-            ret_val = checker._get_environment_updates()
-
-        self.assertTrue(isinstance(ret_val, list))
-        self.assertTrue(isinstance(ret_val[0], Update))
-        self.assertEqual(ret_val[0].name, 'First Project')
-        self.assertEqual(ret_val[0].new_version, '10.1c')
-
-    def test_get_available_versions_capitalize(self):
-        package_releases = mock.Mock(side_effect=([], [1.0]))
-        checker = get_checker()
-        checker._pypi.package_releases = package_releases
-
-        checker._get_available_versions('distribution')
-        self.assertEqual(
-            checker._pypi.package_releases.call_args_list,
-            [mock.call('distribution'), mock.call('Distribution')]
-        )

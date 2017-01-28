@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from unittest import TestCase
 
-from pipcheck.pipcheck import Update
+from pipcheck.update import Update
 
 
 class TestUpdate(TestCase):

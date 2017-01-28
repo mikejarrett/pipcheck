@@ -1,14 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import argparse
+import sys
 
 import pip
 
-from .clients import PyPIClient
 from .checker import Checker
+from .clients import PyPIClient
+from .constants import PYPI_URL
 
 
-def main():
+def parse_args(args):
     parser = argparse.ArgumentParser(
         description=(
             'pipcheck is an application that checks for updates for PIP '
@@ -44,13 +46,18 @@ def main():
     parser.add_argument(
         '-p',
         '--pypi',
-        default='https://pypi.python.org/pypi',
-        metavar='https://pypi.python.org/pypi',
+        default=PYPI_URL,
+        metavar=PYPI_URL,
         nargs='?',
-        help='Change the pypi server from https://pypi.python.org/pypi',
+        help='Change the PyPI server from {0}'.format(PYPI_URL),
     )
 
-    args = parser.parse_args()
+    return parser.parse_args(args)
+
+
+def main():  # pragma: no cover
+    args = parse_args(sys.argv)
+
     checker = Checker(
         pypi_client=PyPIClient(args.pypi),
         pip=pip,
@@ -61,4 +68,7 @@ def main():
     if not (args.csv or args.requirements):
         verbose = True
 
-    checker.get_updates(display_all_distributions=args.all, verbose=verbose)
+    checker.get_updates(
+        display_all_distributions=args.all,
+        verbose=verbose
+    )

@@ -56,7 +56,11 @@ def parse_args(args):
 
 
 def main():  # pragma: no cover
-    args = parse_args(sys.argv)
+    args = sys.argv[1:]
+    if not args:
+        args = ['--help']
+
+    args = parse_args(args)
 
     checker = Checker(
         pypi_client=PyPIClient(args.pypi),

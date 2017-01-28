@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
+from .constants import PYPI_URL
+from .exceptions import PyPIClientError
+
+
 try:  # Py3
     import xmlrpc.client as xmlrpclib
 except ImportError:  # Py2
     import xmlrpclib
 
-from .constants import PYPI_URL
 
 
 class PyPIClient(object):
@@ -22,7 +25,10 @@ class PyPIClient(object):
         Returns:
             list: Of string versions.
         """
-        return self._connection.package_releases(project_name)
+        try:
+            return self._connection.package_releases(project_name)
+        except Exception as err:
+            raise PyPIClientError(err)
 
 
 class PyPIClientPureMemory(object):

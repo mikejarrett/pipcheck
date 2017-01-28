@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=protected-access
 import sys
 import types
 from collections import namedtuple
@@ -130,12 +131,12 @@ class TestChecker(TestCase):
         self.assertEqual(actual, [])
 
     def test_get_updates_updates_available(self):
-        pip = PipMock()
-        pip.set_installed_distributions([Distribution('pipcheck', '0.0.1')])
+        pip_ = PipMock()
+        pip_.set_installed_distributions([Distribution('pipcheck', '0.0.1')])
 
         checker = Checker(
             pypi_client=self.pypi_client,
-            pip=pip,
+            pip=pip_,
         )
 
         actual = checker.get_updates()
@@ -145,14 +146,14 @@ class TestChecker(TestCase):
     def test_get_updates_updates_available_prerelease(self):
         self.pypi_client.set_package_releases('Pipcheck', ['0.0.6rc1'])
 
-        pip = PipMock()
-        pip.set_installed_distributions(
+        pip_ = PipMock()
+        pip_.set_installed_distributions(
             [Distribution('Pipcheck', '0.0.1')]
         )
 
         checker = Checker(
             pypi_client=self.pypi_client,
-            pip=pip,
+            pip=pip_,
         )
 
         actual = checker.get_updates()
@@ -160,14 +161,14 @@ class TestChecker(TestCase):
         self.assertEqual(actual, expected)
 
     def test_get_updates_display_all_distributions(self):
-        pip = PipMock()
-        pip.set_installed_distributions(
+        pip_ = PipMock()
+        pip_.set_installed_distributions(
             [Distribution('pipcheck', '0.0.6')]
         )
 
         checker = Checker(
             pypi_client=self.pypi_client,
-            pip=pip,
+            pip=pip_,
         )
 
         actual = checker.get_updates(display_all_distributions=True)
@@ -175,15 +176,15 @@ class TestChecker(TestCase):
         self.assertEqual(actual, expected)
 
     def test_get_updates_display_all_distributions_multiple(self):
-        pip = PipMock()
-        pip.set_installed_distributions([
+        pip_ = PipMock()
+        pip_.set_installed_distributions([
             Distribution('pipcheck', '0.0.6'),
             Distribution('flush', '1.8.6')
         ])
 
         checker = Checker(
             pypi_client=self.pypi_client,
-            pip=pip,
+            pip=pip_,
         )
 
         actual = checker.get_updates(display_all_distributions=True)
@@ -200,10 +201,10 @@ class TestChecker(TestCase):
         csv_writer = mock.Mock()
         patched_csv.writer.return_value = csv_writer
 
-        pip = PipMock()
+        pip_ = PipMock()
         checker = Checker(
             pypi_client=self.pypi_client,
-            pip=pip,
+            pip=pip_,
         )
 
         open_mock = mockopen()
@@ -228,10 +229,10 @@ class TestChecker(TestCase):
     def test_write_new_config(self):
         updates = [Update('A Package', 1, 2), Update('Last', 5, 9)]
 
-        pip = PipMock()
+        pip_ = PipMock()
         checker = Checker(
             pypi_client=self.pypi_client,
-            pip=pip,
+            pip=pip_,
             new_config='/path/config.pip'
         )
         open_mock = mockopen()

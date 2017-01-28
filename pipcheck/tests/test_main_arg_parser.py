@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-from unittest2 import TestCase
-
 from argparse import Namespace
 
-from pipcheck.main import parse_args
+from unittest2 import TestCase
+
 from pipcheck.constants import PYPI_URL
+from pipcheck.main import parse_args
 
 
 class TestArgParser(TestCase):

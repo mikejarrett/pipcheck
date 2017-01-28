@@ -9,7 +9,6 @@ except ImportError:  # Py2
     import xmlrpclib
 
 
-
 class PyPIClient(object):
 
     def __init__(self, pypi_url=PYPI_URL):

@@ -31,7 +31,11 @@ class Checker(object):
         self._csv_file_name = csv_file
         self._new_config = new_config
 
-    def get_updates(self, display_all_distributions=False, verbose=False):
+    def get_updates(
+        self,
+        display_all_distributions=False,
+        verbose=False
+    ):  # pragma: no cover
         """
         When called, get the environment updates and write updates to a CSV
         file and if a new config has been provided, write a new configuration
@@ -161,11 +165,13 @@ class Checker(object):
                 versions returned by PyPI.
         """
         available_versions = self.pypi_client.package_releases(project_name)
+
         if not available_versions:
             available_versions = self.pypi_client.package_releases(
                 project_name.capitalize()
             )
 
+        # ``dict()`` for Python 2.6 syntax.
         return dict(
             (self._parse_version(version), version)
             for version in available_versions

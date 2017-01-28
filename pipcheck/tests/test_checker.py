@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 import sys
+import types
 from collections import namedtuple
 
+import pip
 import mock
 from unittest2 import TestCase
 
 from pipcheck.checker import Checker
-from pipcheck.clients import PyPIClientPureMemory
+from pipcheck.clients import PyPIClientPureMemory, PyPIClient
 from pipcheck.constants import UNKNOWN, CSV_COLUMN_HEADERS
 from pipcheck.update import Update
 
@@ -241,3 +243,11 @@ class TestChecker(TestCase):
             mock.call('/path/config.pip', 'wb')
         )
         self.assertEqual(open_mock.return_value.write.call_count, 2)
+
+    def test_init(self):
+        checker = Checker()
+        self.assertTrue(isinstance(checker.pypi_client, PyPIClient))
+        self.assertTrue(isinstance(checker.pip, types.ModuleType))
+        self.assertTrue(checker.pip.__name__, pip.__name__)
+        self.assertFalse(checker._csv_file_name)
+        self.assertFalse(checker._new_config)

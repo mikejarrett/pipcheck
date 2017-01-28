@@ -16,7 +16,7 @@ setup(
     name='pipcheck',
     version=pipcheck.__version__,
     author='Mike Jarrett',
-    author_emai='mike<dot>d<dot>jarrett<at>gmail<dot>com',
+    author_email='mike<dot>d<dot>jarrett<at>gmail<dot>com',
     url='https://github.com/mikejarrett/pipcheck',
     description='Environment package update checker',
     long_description=long_description,

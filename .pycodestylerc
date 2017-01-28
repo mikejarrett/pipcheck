@@ -1,0 +1,3 @@
+[pycodestyle]
+exclude = venv,migrations,tests,tests.py,.svn,CVS,.bzr,.hg,.git,__pycache__,.tox,.ropeproject
+max-line-length = 80

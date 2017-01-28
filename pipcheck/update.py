@@ -17,7 +17,7 @@ class Update(object):
         self.prelease = prelease
 
         if new_version == UNKNOWN:
-            self.prelease = UNKNOWN
+            self.prelease = UNKNOWN  # pylint: disable=redefined-variable-type
 
     def __eq__(self, other):
         return (

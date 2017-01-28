@@ -2,7 +2,10 @@
 # -*- coding: utf-8 -*-
 import argparse
 
-from .pipcheck import Checker
+import pip
+
+from .clients import PyPIClient
+from .checker import Checker
 
 
 def main():
@@ -41,20 +44,21 @@ def main():
     parser.add_argument(
         '-p',
         '--pypi',
-        default='http://pypi.python.org/pypi',
-        metavar='http://pypi.python.org/pypi',
+        default='https://pypi.python.org/pypi',
+        metavar='https://pypi.python.org/pypi',
         nargs='?',
-        help='Change the pypi server from http://pypi.python.org/pypi',
+        help='Change the pypi server from https://pypi.python.org/pypi',
     )
 
     args = parser.parse_args()
     checker = Checker(
+        pypi_client=PyPIClient(args.pypi),
+        pip=pip,
         csv_file=args.csv,
         new_config=args.requirements,
-        pypi=args.pypi
     )
     verbose = args.verbose
     if not (args.csv or args.requirements):
         verbose = True
 
-    checker(get_all_updates=args.all, verbose=verbose)
+    checker.get_updates(display_all_distributions=args.all, verbose=verbose)

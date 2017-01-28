@@ -52,9 +52,9 @@ Python
 
 .. code:: python
 
-    >>> from pipcheck.pipcheck import Checker
+    >>> from pipcheck.checker import Checker
     >>> checker = Checker(csv_file='/tmp/updates.csv', new_config='/tmp/updates.pip')
-    >>> checker(get_all_updates=True, verbose=True)
+    >>> checker.get_updates(get_all_updates=True, verbose=True)
     Update Django (1.5.5 to 1.6.2)
     Update clonedigger (Unknown)
     Update ipdb (up to date)
@@ -83,6 +83,18 @@ Command-line
     -p [http://pypi.python.org/pypi], --pypi [http://pypi.python.org/pypi]
                           Change the pypi server from
                           http://pypi.python.org/pypi
+
+Python Versions
+===============
+
+Tested with against the following Python versions:
+
+* 3.6.0
+* 3.5.2
+* 3.4.6
+* 3.3.6
+* 2.7.13
+* 2.6.9
 
 Licence
 =======

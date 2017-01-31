@@ -26,7 +26,7 @@ setup(
     tests_require=['nose', 'coverage', 'unittest2', 'mock'],
     entry_points={
         'console_scripts': [
-            'pipcheck = pipcheck.main:main',
+            'pipcheck = pipcheck.__main__:main',
         ]
     },
     classifiers=[

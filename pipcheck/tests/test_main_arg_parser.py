@@ -4,7 +4,7 @@ from argparse import Namespace
 from unittest2 import TestCase
 
 from pipcheck.constants import PYPI_URL
-from pipcheck.main import parse_args
+from pipcheck.arg_parser import parse_args
 
 
 class TestArgParser(TestCase):

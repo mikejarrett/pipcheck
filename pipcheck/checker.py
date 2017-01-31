@@ -2,6 +2,8 @@
 from __future__ import unicode_literals
 
 import csv
+import sys
+import logging
 
 import pip as pip_module
 from pkg_resources import parse_version
@@ -44,18 +46,23 @@ class Checker(object):
         Args:
             display_all_distributions (bool): Return distribution even if it is
                 up-to-date.
-            verbose (bool): Print to terminal.
+            verbose (bool): If ``True``, log to terminal to terminal.
         """
         if verbose:
-            print('Checking installed packages for updates...')
+            logging.basicConfig(
+                stream=sys.stdout,
+                level=logging.INFO,
+                format='%(message)s',
+            )
+            logging.info('Checking installed packages for updates...')
 
         updates = self._get_environment_updates(
             display_all_distributions=display_all_distributions
         )
 
-        if updates and verbose:
+        if updates:
             for update in updates:
-                print(update)
+                logging.info(update)
 
         if updates and self._csv_file_name:
             self.write_updates_to_csv(updates)

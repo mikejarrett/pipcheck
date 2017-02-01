@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import csv
 import sys
 import logging
@@ -72,6 +70,16 @@ class Checker(object):
 
         return updates
 
+    @staticmethod
+    def csv_writer(csvfile):
+        """ Get a CSV writer for the version of python that is being run. """
+        if sys.version_info >= (3,):
+            writer = csv.writer(csvfile, delimiter=',', lineterminator='\n')
+        else:
+            writer = csv.writer(csvfile, delimiter=b',', lineterminator='\n')
+
+        return writer
+
     def write_updates_to_csv(self, updates):
         """
         Given a list of updates, write the updates out to the provided CSV
@@ -80,8 +88,8 @@ class Checker(object):
         Args:
             updates (list): List of Update objects.
         """
-        with open(self._csv_file_name, 'wb') as csvfile:
-            csvwriter = csv.writer(csvfile)
+        with open(self._csv_file_name, 'w') as csvfile:
+            csvwriter = self.csv_writer(csvfile)
             csvwriter.writerow(CSV_COLUMN_HEADERS)
 
             for update in updates:
@@ -101,7 +109,7 @@ class Checker(object):
         Args:
             updates (list): List of Update objects.
         """
-        with open(self._new_config, 'wb') as config_file:
+        with open(self._new_config, 'w') as config_file:
             for update in updates:
                 line = '{0}=={1}  # The installed version is: {2}\n'.format(
                     update.name,

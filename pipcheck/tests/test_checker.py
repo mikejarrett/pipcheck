@@ -211,9 +211,22 @@ class TestChecker(TestCase):
         with mock.patch('pipcheck.checker.open', open_mock, create=True):
             checker.write_updates_to_csv(updates)
 
+        if sys.version_info >= (3,):
+            expected = mock.call(
+                open_mock.return_value,
+                delimiter=',',
+                lineterminator='\n'
+            )
+        else:
+            expected = mock.call(
+                open_mock.return_value,
+                delimiter=b',',
+                lineterminator='\n'
+            )
+
         self.assertEqual(
             patched_csv.writer.call_args,
-            mock.call(open_mock.return_value)
+            expected
         )
         self.assertEqual(patched_csv.writer.call_count, 1)
         self.assertEqual(csv_writer.writerow.call_count, 3)
@@ -241,7 +254,7 @@ class TestChecker(TestCase):
 
         self.assertEqual(
             open_mock.call_args,
-            mock.call('/path/config.pip', 'wb')
+            mock.call('/path/config.pip', 'w')
         )
         self.assertEqual(open_mock.return_value.write.call_count, 2)
 
